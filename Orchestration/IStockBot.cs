@@ -1,6 +1,7 @@
 ﻿using Entities;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,6 @@ namespace Orchestration
 {
     public interface IStockBot
     {
-        async Task<StockResponse> getStock(string stockCode);
+        Task<StockResponse> GetStock(string stockCode, string url, string stockToken, HttpMethod httpMethod);
     }
 }
