@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DB\**" />
+    <Content Remove="DB\**" />
+    <EmbeddedResource Remove="DB\**" />
+    <None Remove="DB\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.10" />
@@ -18,10 +25,6 @@
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
     <ProjectReference Include="..\Orchestration\Orchestration.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DB\" />
   </ItemGroup>
 
 </Project>
