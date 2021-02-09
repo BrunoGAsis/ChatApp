@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Orchestration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,26 +18,30 @@ namespace ChatApp.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMessageManager _msgManager;
 
-        public HomeController(ILogger<HomeController> logger, UserManager<IdentityUser> userManager)
+        public HomeController(ILogger<HomeController> logger, UserManager<IdentityUser> userManager, IMessageManager msgManager)
         {
             _logger = logger;
             _userManager = userManager;
+            _msgManager = msgManager;
         }
 
         public async Task<IActionResult> Index()
         {
             IdentityUser currentUser = await _userManager.GetUserAsync(User);
-            ViewBag.CurrentUserEmail = currentUser.Email;
+            if (currentUser != null)
+            {
+                ViewBag.CurrentUserEmail = currentUser.Email;
+                ViewBag.CurrentUserName = currentUser.UserName;
+            }
             return View();
         }
 
-        public async Task<IActionResult> SendMessage(string message)
+        public IActionResult GetAvailableMessages()
         {
-
-            return Ok();
+            return Json(_msgManager.GetAvailableMessages());
         }
-
         public IActionResult Privacy()
         {
             return View();

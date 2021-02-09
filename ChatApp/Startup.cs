@@ -1,4 +1,5 @@
-using ChatApp.Data;
+using Business;
+using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Orchestration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,9 +21,16 @@ namespace ChatApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+
+            //Set Orchestration Configuration Values from appsettings.json file
+            OrchestrationConfiguration.BotStockCodeToken = Configuration["BotStockCodeToken"];
+            OrchestrationConfiguration.BotStockEndPoint = Configuration["BotStockEndpoint"];
+            OrchestrationConfiguration.StockCommandToken = Configuration["StockCommandToken"];
+            OrchestrationConfiguration.MessageManagerQueueLimit = Convert.ToInt32(Configuration["MessageManagerQueueLimit"]);
+            OrchestrationConfiguration.RetrieveHistoryChatOnStartup = Convert.ToBoolean(Configuration["RetrieveHistoryChatOnStart"]);
         }
 
         public IConfiguration Configuration { get; }
@@ -29,9 +38,11 @@ namespace ChatApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("AppDbConnectionString")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             
@@ -42,8 +53,17 @@ namespace ChatApp
             services.AddSignalR();
             //Add bot services
             services.AddSingleton<IStockBot, StockBot>();
+            //Add ChatMessage Business and Data Services
+            services.AddScoped<IChatMessageBusiness, ChatMessageBusiness>();
+            services.AddScoped<IChatMessageData, ChatMessageData>();
+            //Add message manager service
+            services.AddSingleton<IMessageManager, MessageManager>();
             services.AddHttpClient();
+
+            
+            
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -63,7 +83,7 @@ namespace ChatApp
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -74,9 +94,8 @@ namespace ChatApp
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
                 //Configure SignalR Message HUB
-                endpoints.MapHub<MessageManager>("/Home/Index");
+                endpoints.MapHub<MessageController>("/Home/Index");
             });
-
 
         }
     }

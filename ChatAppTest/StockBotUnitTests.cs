@@ -2,21 +2,26 @@ using Orchestration;
 using System;
 using System.Net.Http;
 using Xunit;
-
+using Moq;
+using Data;
 namespace ChatAppTest
 {
     public class StockBotUnitTests
     {
         private readonly string botUrl = "https://stooq.com/q/l/?s=[stockcode]&f=sd2t2ohlcv&h&e=csv";
         private readonly string stockCodeToken = "[stockcode]";
+        private readonly string testEmail = "test@email.com";
         [Fact]
-        public void GetStock()
+        public void GetStockFine()
         {
             StockBot bot = new StockBot();
             string stockCode = "aapl.us";
-            var StockResponse = bot.GetStock(stockCode, botUrl, stockCodeToken, HttpMethod.Get).Result;
 
-            Assert.True(StockResponse.Stock != string.Empty);
+            var mockMsgController = new Mock<IMessageController>();
+
+            var StockResponse = bot.GetStock(stockCode, botUrl, stockCodeToken, HttpMethod.Get, true, mockMsgController.Object, testEmail).Result;
+
+            Assert.True(StockResponse.StockValue != string.Empty);
         }
 
         [Fact]
@@ -25,9 +30,11 @@ namespace ChatAppTest
             StockBot bot = new StockBot();
             string stockCode = "NotExists";
 
-            var StockResponse = bot.GetStock(stockCode, botUrl, stockCodeToken, HttpMethod.Get).Result;
+            var mockMsgController = new Mock<IMessageController>();
 
-            Assert.True(StockResponse.Stock == string.Empty);
+            var StockResponse = bot.GetStock(stockCode, botUrl, stockCodeToken, HttpMethod.Get, true,mockMsgController.Object, testEmail).Result;
+
+            Assert.True(StockResponse.StockValue == string.Empty);
         }
 
         [Fact]
@@ -36,9 +43,18 @@ namespace ChatAppTest
             StockBot bot = new StockBot();
             string stockCode = "NOTEXISTS";
 
-            var StockResponse = bot.GetStock(stockCode, "http://www.microsoft.com/", stockCodeToken, HttpMethod.Get).Result;
+            var mockMsgController = new Mock<IMessageController>();
+
+            var StockResponse = bot.GetStock(stockCode, "http://www.microsoft.com/", stockCodeToken, HttpMethod.Get, true, mockMsgController.Object, testEmail).Result;
 
             Assert.NotNull(StockResponse.Error);
+        }
+
+        [Fact]
+        public void TestDB()
+        {
+            
+            
         }
     }
 }

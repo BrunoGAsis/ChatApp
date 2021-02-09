@@ -11,7 +11,8 @@ namespace Orchestration
 {
     public class StockBot : IStockBot
     {
-        public async Task<StockResponse> GetStock(string stockCode, string url, string stockToken, HttpMethod httpMethod)
+
+        public async Task<StockResponse> GetStock(string stockCode, string url, string stockToken, HttpMethod httpMethod, bool sendMessage, IMessageController msgController, string userEmail)
         {
             StockResponse result = new StockResponse();
             result.StockCode = stockCode;
@@ -28,16 +29,37 @@ namespace Orchestration
                 }
                 else
                 {
-                    result.Stock = string.Empty;
+                    result.StockValue = string.Empty;
                     result.Error = new Exception(string.Format("Error while trying to call {0} returned status code {1}", stockUrl, response.StatusCode));
                 }
             }
             catch (Exception ex)
             {
-                result.Stock = string.Empty;
+                result.StockValue = string.Empty;
                 result.Error = ex;
             }
 
+            if(sendMessage)
+            {
+                ChatMessage msg = new ChatMessage();
+                msg.UserEmail = "ChatBot";
+                msg.IsChatBotMessage = true;
+                if (result.StockValue != string.Empty)
+                {
+                    msg.MessageText = string.Format("{0} quote is ${1} per share", stockCode, result.StockValue);
+                    
+                    await msgController.SendMessage(msg);
+                }
+                else
+                {
+                    msg.MessageText = string.Format("Sorry {0}, I could not retrieve the quote share for {1}", userEmail, stockCode);
+                    if(result.Error != null)
+                    {
+                        msg.MessageText += string.Format(", reason: {0}", result.Error.Message);
+                    }
+                    await msgController.SendErrorMessage(msg);
+                }
+            }
             return result;
         }
 
@@ -58,19 +80,19 @@ namespace Orchestration
 
                 if(double.TryParse(csvRows.Current.Result.Close, out close))
                 {
-                    result.Stock = csvRows.Current.Result.Close;
+                    result.StockValue = csvRows.Current.Result.Close;
                     result.Error = null;
                 }
                 else
                 {
-                    result.Stock = string.Empty;
-                    result.Error = new Exception("Error while trying to read stock value from endpoint file");
+                    result.StockValue = string.Empty;
+                    result.Error = new Exception("Error while trying to read stock value, as it is not available");
                 }
-                return (result.Stock != string.Empty);
+                return (result.StockValue != string.Empty);
             }
             catch (Exception ex)
             {
-                result.Stock = string.Empty;
+                result.StockValue = string.Empty;
                 result.Error = ex;
                 return false;
             }

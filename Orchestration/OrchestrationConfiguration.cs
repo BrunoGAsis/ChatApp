@@ -10,10 +10,11 @@ namespace Orchestration
         //Default values
         private static string _botStockEndpoint = "https://stooq.com/q/l/?s=[stockCode]&f=sd2t2ohlcv&h&e=csv​";
         private static string _botStockCodeToken = "[stockCode]";
-        private static int  _messageManagerQueueLimit = 50;
-        private static string _commandToken = "/stock=";
+        private static int _messageManagerQueueLimit = 50;
+        private static string _stockCommandToken = "/stock=";
         private static HttpMethod _botHTTPMethod = HttpMethod.Get;
-        public static string BotStockEndPoint 
+        private static bool _retrieveHistoryChatOnStartup = true;
+        public static string BotStockEndPoint
         {
             get
             {
@@ -24,8 +25,8 @@ namespace Orchestration
                 _botStockEndpoint = value;
             }
         }
-        public static string BotStockCodeToken 
-        { 
+        public static string BotStockCodeToken
+        {
             get
             {
                 return _botStockCodeToken;
@@ -48,15 +49,16 @@ namespace Orchestration
             }
         }
 
-        public static string CommandToken
+
+        public static string StockCommandToken
         {
             get
             {
-                return _commandToken;
+                return _stockCommandToken;
             }
             set
             {
-                _commandToken = value;
+                _stockCommandToken = value;
             }
         }
 
@@ -69,6 +71,18 @@ namespace Orchestration
             set
             {
                 _botHTTPMethod = value;
+            }
+        }
+
+        public static bool RetrieveHistoryChatOnStartup
+        {
+            get
+            {
+                return _retrieveHistoryChatOnStartup;
+            }
+            set
+            {
+                _retrieveHistoryChatOnStartup = value;
             }
         }
     }

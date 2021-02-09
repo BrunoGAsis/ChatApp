@@ -7,7 +7,7 @@ namespace Entities
     public class StockResponse
     {
         public string StockCode { get; set; }
-        public string Stock { get; set; }
+        public string StockValue { get; set; }
         public Exception Error { get; set; }
     }
 }

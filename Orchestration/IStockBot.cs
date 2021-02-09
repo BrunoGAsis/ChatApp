@@ -9,6 +9,7 @@ namespace Orchestration
 {
     public interface IStockBot
     {
-        Task<StockResponse> GetStock(string stockCode, string url, string stockToken, HttpMethod httpMethod);
+
+        Task<StockResponse> GetStock(string stockCode, string url, string stockToken, HttpMethod httpMethod, bool sendMessage, IMessageController msgController, string userEmail);
     }
 }

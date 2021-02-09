@@ -1,0 +1,6 @@
+user: bruno@gmail.com
+pwd: Bruno123#
+
+user: test@gmail.com
+pwd: Test123#
+
